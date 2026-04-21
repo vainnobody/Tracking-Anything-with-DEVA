@@ -100,6 +100,8 @@ If a license is not found, we fall back to using [PuLP](https://github.com/coin-
 
 ## Quick Start
 
+[Getting Started / 部署与使用指南](docs/GETTING_STARTED.md) provides a bilingual setup and usage walkthrough that covers deployment, model download, command-line examples, outputs, and troubleshooting.
+
 [DEMO.md](docs/DEMO.md) contains more details on the input arguments and tips on speeding up inference.
 You can always look at `deva/inference/eval_args.py` and `deva/ext/ext_eval_args.py` for a full list of arguments.
 
