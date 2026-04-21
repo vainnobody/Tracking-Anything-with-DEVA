@@ -19,6 +19,22 @@ from deva.inference.object_manager import ObjectManager
 from deva.inference.object_info import ObjectInfo
 
 
+def make_box_annotator():
+    for annotator_name in ('BoundingBoxAnnotator', 'BoxAnnotator', 'RoundBoxAnnotator'):
+        annotator_cls = getattr(sv, annotator_name, None)
+        if annotator_cls is not None:
+            return annotator_cls()
+    raise AttributeError('No compatible box annotator found in supervision.')
+
+
+def make_label_annotator():
+    for annotator_name in ('LabelAnnotator', 'RichLabelAnnotator'):
+        annotator_cls = getattr(sv, annotator_name, None)
+        if annotator_cls is not None:
+            return annotator_cls()
+    raise AttributeError('No compatible label annotator found in supervision.')
+
+
 class ResultSaver:
     def __init__(self,
                  output_root: str,
@@ -260,8 +276,8 @@ def save_result(queue: Queue):
                         detections = sv.Detections(xyxy,
                                                    confidence=np.array(all_scores),
                                                    class_id=np.array(all_cat_ids))
-                        box_annotator = sv.BoundingBoxAnnotator()
-                        label_annotator = sv.LabelAnnotator()
+                        box_annotator = make_box_annotator()
+                        label_annotator = make_label_annotator()
                         blend = box_annotator.annotate(scene=blend,
                                                    detections=detections)
                         blend = label_annotator.annotate(scene=blend,
