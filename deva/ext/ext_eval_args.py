@@ -44,6 +44,11 @@ def add_ext_eval_args(parser: ArgumentParser):
                         type=float,
                         help='Overlap threshold for overlapped mask suppression in SAM',
                         default=0.8)
+    parser.add_argument('--sam_size',
+                        type=int,
+                        default=-1,
+                        help='Resize the shorter side for automatic SAM before inference. '
+                        '-1 keeps the original resolution; smaller values only downscale.')
 
 
 def add_text_default_args(parser):

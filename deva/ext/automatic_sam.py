@@ -1,8 +1,7 @@
 # Reference: https://github.com/IDEA-Research/Grounded-Segment-Anything
 
 from typing import Dict, List, Optional
-import numpy as np
-
+import cv2
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -11,6 +10,23 @@ from segment_anything import sam_model_registry
 from deva.ext.SAM.automatic_mask_generator import SamAutomaticMaskGenerator
 from deva.ext.MobileSAM.setup_mobile_sam import setup_model as setup_mobile_sam
 from deva.inference.object_info import ObjectInfo
+
+
+def resize_image_min_side(image: np.ndarray, min_side: int) -> np.ndarray:
+    if min_side is None or min_side <= 0:
+        return image
+
+    h, w = image.shape[:2]
+    shorter = min(h, w)
+    if shorter <= min_side:
+        # Avoid upscaling because it only increases memory use.
+        return image
+
+    scale = min_side / shorter
+    new_h, new_w = int(h * scale), int(w * scale)
+    interpolation = cv2.INTER_AREA if scale < 1 else cv2.INTER_LINEAR
+    resized = cv2.resize(image, (new_w, new_h), interpolation=interpolation)
+    return np.ascontiguousarray(resized)
 
 
 def get_sam_model(config: Dict, device: str) -> SamAutomaticMaskGenerator:
@@ -57,6 +73,8 @@ def auto_segment(config: Dict, auto_sam: SamAutomaticMaskGenerator, image: np.nd
     """
     device = auto_sam.predictor.device
 
+    sam_image = resize_image_min_side(image, config.get('sam_size', -1))
+
     h, w = image.shape[:2]
     if min_side > 0:
         scale = min_side / min(h, w)
@@ -86,9 +104,9 @@ def auto_segment(config: Dict, auto_sam: SamAutomaticMaskGenerator, image: np.nd
             return output_mask, segments_info
         # negative_points = points[points_label >= 0.5].cpu().numpy()
         negative_points = None  # no negative points
-        mask_data = auto_sam.generate(image, positive_points, negative_points)
+        mask_data = auto_sam.generate(sam_image, positive_points, negative_points)
     else:
-        mask_data = auto_sam.generate(image)
+        mask_data = auto_sam.generate(sam_image)
 
     curr_id = 1
     segments_info = []

@@ -135,6 +135,7 @@ python demo/demo_automatic.py --chunk_size 4 \
 --img_path ./example/vipseg/images/12_1mWNahzcsAc \
 --amp --temporal_setting semionline \
 --size 480 \
+--sam_size 960 \
 --output ./example/output
 ```
 
@@ -149,6 +150,7 @@ English: These are the parameters you are most likely to tune in the command-lin
 - `--amp`: 启用混合精度，通常更快且更省显存 / Enables mixed precision for better speed and lower memory usage on most modern GPUs
 - `--chunk_size`: 并行处理的对象数量；更大通常更快，但更占显存 / Number of objects processed in parallel; larger is often faster but uses more memory
 - `--size`: 传播模块内部处理分辨率，默认 `480` / Internal processing resolution for the propagation module, default `480`
+- `--sam_size`: 自动模式下 SAM 的输入短边；`-1` 表示保留原始分辨率，推荐在 4K 输入时设为 `720` 到 `1080` / Shorter side used by automatic SAM in automatic mode; `-1` keeps the original resolution, and `720` to `1080` is a good starting range for 4K inputs
 - `--temporal_setting`: 时序模式，可选 `semionline` 或 `online` / Temporal mode, either `semionline` or `online`
 - `--detection_every`: 每隔多少帧执行一次检测 / Number of frames between detections
 - `--max_missed_detection_count`: 连续多少次未检测到后删除对象 / Number of consecutive missed detections before an object is removed
@@ -178,6 +180,8 @@ English: If you use your own frame directory, simply point `--img_path` to that 
 - 中文：文本提示模式依赖 Grounded-Segment-Anything；如果相关依赖未正确安装，文本模式和部分 Gradio 功能都可能无法正常启动。
   English: Text-prompted mode depends on Grounded-Segment-Anything; if that stack is not installed correctly, text mode and parts of the Gradio workflow may fail to start.
 - 中文：推理速度与显存占用会明显受到 `--chunk_size`、`--size`、`--detection_every` 和场景中的目标数量影响。
-  English: Runtime and memory usage are strongly affected by `--chunk_size`, `--size`, `--detection_every`, and the number of objects in the scene.
+- 中文：对于 `demo_automatic.py`，`--size` 主要影响 DEVA 传播分支；如果你处理 4K 视频，真正更关键的是同时设置 `--sam_size`，否则自动 SAM 仍会直接在原始分辨率上运行。
+  English: For `demo_automatic.py`, `--size` mainly affects the DEVA propagation branch; for 4K videos, `--sam_size` is the more important knob because automatic SAM otherwise still runs at the original resolution.
+- English: Runtime and memory usage are strongly affected by `--chunk_size`, `--size`, `--detection_every`, and the number of objects in the scene.
 - 中文：如果你想进一步了解参数含义和加速建议，可以继续阅读 [DEMO.md](./DEMO.md)。
   English: For more argument details and performance tips, continue with [DEMO.md](./DEMO.md).
